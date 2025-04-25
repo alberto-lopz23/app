@@ -6,7 +6,8 @@ const ButtonGeneral = ({ title, to }) => {
 
   return (
     <TouchableOpacity style={styles.button} onPress={() => navigation.navigate(to)}>
-      <Text style={styles.text}>{title}</Text>
+{/* Suggested code may be subject to a license. Learn more: ~LicenseLog:2167005006. */}
+      <Text style={styles.buttonText}>{title}</Text>
     </TouchableOpacity>
   );
 };
@@ -14,18 +15,16 @@ const ButtonGeneral = ({ title, to }) => {
 const styles = StyleSheet.create({
   button: {
     backgroundColor: '#007bff',
-    padding: 12,
+    padding: 13,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     margin: 10,
   },
-  text: {
+  buttonText: {
     color: '#fff',
-    fontWeight: 'bold',
     fontSize: 20,
-
-  }
+  },
 });
 
 export default ButtonGeneral;

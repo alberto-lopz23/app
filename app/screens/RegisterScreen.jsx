@@ -1,49 +1,49 @@
-// RegisterScreen.js
 import React, { useState } from 'react';
 import { View, TextInput, Button, Alert, StyleSheet, Text } from 'react-native';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
-import { app } from '../../firebaseConfig'; // Importa la instancia de Firebase
+import { getDatabase, ref, set } from 'firebase/database'; // Para guardar en Realtime Database
+import { app } from '../../firebaseConfig';  // Asegúrate de importar la instancia de Firebase correctamente
 
-// Obtén el objeto auth utilizando la instancia de Firebase
-const auth = getAuth(app);  // Usa la app que ya está inicializada
+const auth = getAuth(app);  // Usa la instancia de Firebase para obtener el servicio de autenticación
+const db = getDatabase(app);  // Realtime Database
 
 export default function RegisterScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState(''); // Para mostrar el mensaje de error si el correo ya está en uso
+  const [username, setUsername] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleRegister = () => {
-    // Verificar si los campos están vacíos
-    if (!email || !password) {
-      Alert.alert('Error', 'Por favor ingresa tu correo y contraseña.');
+    if (!email || !password || !username) {
+      Alert.alert('Error', 'Por favor llena todos los campos.');
       return;
     }
 
-    // Intentar registrar un nuevo usuario
+    // Primero, registra al usuario con email y contraseña
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
-        // Si el registro es exitoso, puedes redirigir al usuario a la pantalla de inicio
         const user = userCredential.user;
-        Alert.alert('¡Registrado exitosamente!', `Bienvenido, ${user.email}`);
-        navigation.navigate('Home'); // Redirigir al home
+
+        // Guardar el nombre de usuario y la info adicional en la base de datos
+        set(ref(db, 'users/' + user.uid), {
+          username: username,
+          email: email,
+        }).then(() => {
+          Alert.alert('¡Registro Exitoso!', `Bienvenido, ${username}`);
+          navigation.navigate('Login');
+        }).catch((error) => {
+          Alert.alert('Error', error.message);
+        });
       })
       .catch((error) => {
         const errorMessage = error.message;
-
-        // Si el error es de correo ya en uso
-        if (errorMessage.includes('auth/email-already-in-use')) {
-          setErrorMessage('Este correo ya está en uso. ¿Quieres iniciar sesión?');
-        } else {
-          setErrorMessage(errorMessage); // Si es otro error, lo mostramos
-        }
-
-        Alert.alert('Error', errorMessage); // Mostrar el mensaje de error
+        Alert.alert('Error', errorMessage);
       });
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Crear cuenta</Text>
+      <Text style={styles.title}>Crear Cuenta</Text>
       <TextInput
         style={styles.input}
         placeholder="Correo electrónico"
@@ -58,13 +58,17 @@ export default function RegisterScreen({ navigation }) {
         onChangeText={setPassword}
         secureTextEntry
       />
+      <TextInput
+        style={styles.input}
+        placeholder="Nombre de usuario"
+        value={username}
+        onChangeText={setUsername}
+      />
       <Button title="Registrarse" onPress={handleRegister} />
-      {errorMessage ? ( // Si hay un mensaje de error, lo mostramos debajo del botón
-        <Text style={styles.errorMessage}>Ya tienes cuenta. Deja la pajarería</Text>
-      ) : null}
+      {errorMessage && <Text style={styles.errorMessage}>{errorMessage}</Text>}
       <Text
         style={styles.loginText}
-        onPress={() => navigation.navigate('Login')} // Enlace al inicio de sesión
+        onPress={() => navigation.navigate('Login')}
       >
         ¿Ya tienes cuenta? Inicia sesión
       </Text>
@@ -77,7 +81,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 20,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#17c1a8',
   },
   title: {
     fontSize: 24,
@@ -96,7 +100,7 @@ const styles = StyleSheet.create({
   loginText: {
     textAlign: 'center',
     marginTop: 10,
-    color: '#007BFF',
+    color: '#2a2a2g',
   },
   errorMessage: {
     textAlign: 'center',

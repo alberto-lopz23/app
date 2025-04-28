@@ -1,8 +1,8 @@
-// firebaseConfig.js
 import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getDatabase } from 'firebase/database'; // 👉 FALTA ESTO
 
-// Configuración de tu proyecto Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBp3bdFt0N0UqbrkT1ypvjXAo51dBh_vc0",
   authDomain: "secreto-29fd5.firebaseapp.com",
@@ -10,12 +10,13 @@ const firebaseConfig = {
   storageBucket: "secreto-29fd5.appspot.com",
   messagingSenderId: "675974327152",
   appId: "1:675974327152:web:97acb9a9f6e48bc1627db5",
+  databaseURL: "https://secreto-29fd5-default-rtdb.firebaseio.com", // 👉 AÑADE ESTO
 };
 
-// Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 
-// Inicializar Firestore
+const auth = getAuth(app);
 const db = getFirestore(app);
+const database = getDatabase(app); // 👉 AÑADE ESTO
 
-export { db };
+export { auth, db, database }; // 👉 EXPORTA database también

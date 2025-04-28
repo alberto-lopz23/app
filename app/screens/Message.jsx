@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 
 const conversations = [
   {
@@ -32,10 +31,14 @@ const ConversationsScreen = ({ navigation }) => {
         <Text style={styles.lastMessage} numberOfLines={1}>{item.lastMessage}</Text>
       </View>
     </TouchableOpacity>
+
   );
 
   return (
     <View style={styles.container}>
+      <Text style={styles.info}>
+        Esta opción estará disponible el 19 de septiembre. Mientras así quedará
+      </Text>
       <View style={styles.headerRow}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={styles.header}>Volver</Text>
@@ -87,7 +90,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
     margin: 10,
-  }
+  },
+  info: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: '#09f',
+    margin: 10,
+  },
 });
 
 export default ConversationsScreen;

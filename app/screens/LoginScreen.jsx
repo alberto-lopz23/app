@@ -1,15 +1,17 @@
+// src/screens/LoginScreen.js
 import React, { useState } from 'react';
-import { View, TextInput, Button, Alert, StyleSheet, Text } from 'react-native';
+import { View, TextInput, Button, Alert, StyleSheet, Text, Image } from 'react-native';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import { app } from '../../firebaseConfig';  // Asegúrate de importar la instancia de Firebase correctamente
-
+import { app } from '../../firebaseConfig'; // Asegúrate de importar la instancia de Firebase correctamente
+import { useUser } from '../../UserContext'; // Importa el contexto para guardar al usuario
 
 const auth = getAuth(app);  // Usa la instancia de Firebase para obtener el servicio de autenticación
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState(''); // Estado para manejar el mensaje de error
+  const [errorMessage, setErrorMessage] = useState('');
+  const { setCurrentUser } = useUser(); // Usamos el contexto para setear al usuario globalmente
 
   const handleLogin = () => {
     if (!email || !password) {
@@ -20,25 +22,24 @@ export default function LoginScreen({ navigation }) {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         const user = userCredential.user;
+        setCurrentUser({ id: user.uid, email: user.email }); // Guardamos al usuario en el contexto
         Alert.alert('¡Bienvenido!', `Hola, ${user.email}`);
         navigation.navigate('Home');
       })
       .catch((error) => {
         const errorMessage = error.message;
-
-        // Verifica si el error es de usuario no encontrado
         if (errorMessage.includes('auth/user-not-found')) {
           setErrorMessage('No tienes una cuenta. ¿Quieres registrarte?');
         } else {
-          setErrorMessage(errorMessage); // Si es otro tipo de error, lo muestra
+          setErrorMessage(errorMessage);
         }
-
         Alert.alert('Error', errorMessage);
       });
   };
 
   return (
     <View style={styles.container}>
+      <Image style={styles.logo} source={require('../assets/images/fondoReLog.png')} />
       <Text style={styles.title}>Iniciar sesión</Text>
       <TextInput
         style={styles.input}
@@ -55,13 +56,8 @@ export default function LoginScreen({ navigation }) {
         secureTextEntry
       />
       <Button title="Iniciar sesión" onPress={handleLogin} />
-      {errorMessage ? ( // Si hay un mensaje de error, lo mostramos
-        <Text style={styles.errorMessage}>Cuenta no encontrada. Registrate bitch</Text>
-      ) : null}
-      <Text
-        style={styles.signupText}
-        onPress={() => navigation.navigate('Register')}
-      >
+      {errorMessage ? <Text style={styles.errorMessage}>Cuenta no encontrada. Registrate bitch</Text> : null}
+      <Text style={styles.signupText} onPress={() => navigation.navigate('Register')}>
         ¿No tienes cuenta? Regístrate
       </Text>
     </View>
@@ -69,35 +65,10 @@ export default function LoginScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 20,
-    backgroundColor: '#f5f5f5',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  input: {
-    height: 50,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    marginBottom: 20,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-  },
-  signupText: {
-    textAlign: 'center',
-    marginTop: 10,
-    color: '#007BFF',
-  },
-  errorMessage: {
-    textAlign: 'center',
-    color: 'red',
-    marginTop: 10,
-    fontSize: 14,
-  },
+  container: { flex: 1, justifyContent: 'center', padding: 20, backgroundColor: '#17c1a8' },
+  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
+  input: { height: 50, borderColor: '#ccc', borderWidth: 1, marginBottom: 20, paddingHorizontal: 10, borderRadius: 5 },
+  signupText: { textAlign: 'center', marginTop: 10, color: '#2a2a2g' },
+  errorMessage: { textAlign: 'center', color: 'red', marginTop: 10, fontSize: 14 },
+  logo: { width: '100%', height: '30%', alignSelf: 'center', marginBottom: 20, resizeMode: 'contain' },
 });

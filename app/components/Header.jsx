@@ -5,6 +5,7 @@ const Header = () => {
   return (
     <View style={styles.container}>
       <ButtonGeneral title="P" to="Perfil" />
+      <ButtonGeneral title="S" to="Search" />
       <ButtonGeneral title="M" to="Message" />
     </View>
   );
@@ -21,7 +22,7 @@ const styles = StyleSheet.create({
     width: "100%",
     borderBottomWidth: 2,
     borderBottomColor: 'black',
-    backgroundColor: '#fff',
+    backgroundColor: '#7B2CBF',
   },
   
 });

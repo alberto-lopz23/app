@@ -1,38 +1,39 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, Alert, StyleSheet, Text } from 'react-native';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import { firebaseConfig } from '../../firebaseConfig'; // Asegúrate de tener tu firebaseConfig configurado
-import { initializeApp } from 'firebase/app'; // Asegúrate de importar initializeApp
+import { app } from '../../firebaseConfig';  // Asegúrate de importar la instancia de Firebase correctamente
 
-// Inicializar Firebase
-initializeApp(firebaseConfig);
+
+const auth = getAuth(app);  // Usa la instancia de Firebase para obtener el servicio de autenticación
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState(''); // Estado para manejar el mensaje de error
 
-  // Maneja el inicio de sesión
   const handleLogin = () => {
-    const auth = getAuth();
-
-    // Verificar si los campos están vacíos
     if (!email || !password) {
       Alert.alert('Error', 'Por favor ingresa tu correo y contraseña.');
       return;
     }
 
-    // Intentar iniciar sesión con el correo y contraseña
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
-        // Si el inicio de sesión es exitoso, puedes redirigir al usuario a otra pantalla
         const user = userCredential.user;
         Alert.alert('¡Bienvenido!', `Hola, ${user.email}`);
-        navigation.navigate('Home'); // Redirigir al home (cambia esto según tu flujo de navegación)
+        navigation.navigate('Home');
       })
       .catch((error) => {
-        const errorCode = error.code;
         const errorMessage = error.message;
-        Alert.alert('Error', errorMessage); // Mostrar mensaje de error
+
+        // Verifica si el error es de usuario no encontrado
+        if (errorMessage.includes('auth/user-not-found')) {
+          setErrorMessage('No tienes una cuenta. ¿Quieres registrarte?');
+        } else {
+          setErrorMessage(errorMessage); // Si es otro tipo de error, lo muestra
+        }
+
+        Alert.alert('Error', errorMessage);
       });
   };
 
@@ -54,9 +55,12 @@ export default function LoginScreen({ navigation }) {
         secureTextEntry
       />
       <Button title="Iniciar sesión" onPress={handleLogin} />
+      {errorMessage ? ( // Si hay un mensaje de error, lo mostramos
+        <Text style={styles.errorMessage}>Cuenta no encontrada. Registrate bitch</Text>
+      ) : null}
       <Text
         style={styles.signupText}
-        onPress={() => navigation.navigate('Register')} // Enlace al registro
+        onPress={() => navigation.navigate('Register')}
       >
         ¿No tienes cuenta? Regístrate
       </Text>
@@ -89,5 +93,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 10,
     color: '#007BFF',
+  },
+  errorMessage: {
+    textAlign: 'center',
+    color: 'red',
+    marginTop: 10,
+    fontSize: 14,
   },
 });

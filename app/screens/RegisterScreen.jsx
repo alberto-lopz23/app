@@ -2,19 +2,17 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, Alert, StyleSheet, Text } from 'react-native';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
-import { firebaseConfig } from '../../firebaseConfig'; // Asegúrate de tener tu firebaseConfig configurado
+import { app } from '../../firebaseConfig'; // Importa la instancia de Firebase
 
-// Inicializar Firebase (si no lo has hecho en otro lugar)
-import { initializeApp } from 'firebase/app';
-initializeApp(firebaseConfig);
+// Obtén el objeto auth utilizando la instancia de Firebase
+const auth = getAuth(app);  // Usa la app que ya está inicializada
 
 export default function RegisterScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState(''); // Para mostrar el mensaje de error si el correo ya está en uso
 
   const handleRegister = () => {
-    const auth = getAuth();
-
     // Verificar si los campos están vacíos
     if (!email || !password) {
       Alert.alert('Error', 'Por favor ingresa tu correo y contraseña.');
@@ -30,9 +28,16 @@ export default function RegisterScreen({ navigation }) {
         navigation.navigate('Home'); // Redirigir al home
       })
       .catch((error) => {
-        const errorCode = error.code;
         const errorMessage = error.message;
-        Alert.alert('Error', errorMessage); // Mostrar mensaje de error
+
+        // Si el error es de correo ya en uso
+        if (errorMessage.includes('auth/email-already-in-use')) {
+          setErrorMessage('Este correo ya está en uso. ¿Quieres iniciar sesión?');
+        } else {
+          setErrorMessage(errorMessage); // Si es otro error, lo mostramos
+        }
+
+        Alert.alert('Error', errorMessage); // Mostrar el mensaje de error
       });
   };
 
@@ -54,6 +59,9 @@ export default function RegisterScreen({ navigation }) {
         secureTextEntry
       />
       <Button title="Registrarse" onPress={handleRegister} />
+      {errorMessage ? ( // Si hay un mensaje de error, lo mostramos debajo del botón
+        <Text style={styles.errorMessage}>Ya tienes cuenta. Deja la pajarería</Text>
+      ) : null}
       <Text
         style={styles.loginText}
         onPress={() => navigation.navigate('Login')} // Enlace al inicio de sesión
@@ -89,5 +97,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 10,
     color: '#007BFF',
+  },
+  errorMessage: {
+    textAlign: 'center',
+    color: 'red',
+    marginTop: 10,
+    fontSize: 14,
   },
 });
